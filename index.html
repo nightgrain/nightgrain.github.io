@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hello World</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#000; --panel:#0b0b0b; --muted:#9aa4ad; --accent:#66b3ff; }
+    body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; padding: 2rem; background:var(--bg); color:#fff; font-size:16px; line-height:1.35 }
+    button { padding: 0.5rem 1rem; font-size: 0.95rem; background:#111; color:#fff; border:1px solid #222; border-radius:6px }
+    pre#output { white-space:pre-wrap; margin-top:1rem; border:1px solid #222; padding:1rem; max-height:60vh; overflow:auto; background:var(--panel); color:#eee; border-radius:6px }
+    a { color:var(--accent) }
+    .thumb-grid { display:grid; grid-template-columns:repeat(8,40px); grid-auto-rows:40px; gap:4px; justify-content:end; }
+    h1, input { font-family: inherit }
+    input { background:#0b0b0b; color:#ddd; border:1px solid #222; padding:0.4rem; border-radius:6px }
+  </style>
+</head>
+<body>
+  <div style="margin-bottom:0.5rem">
+    <input id="userId" placeholder="User NSID e.g. 7357400@N08" style="padding:0.4rem;margin-right:0.5rem">
+    <button id="btnFav">Get Favorites</button>
+  </div>
+  <pre id="output"></pre>
+  <script src="script.js"></script>
+</body>
+</html>
