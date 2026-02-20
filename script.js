@@ -233,17 +233,23 @@ if (btnClear) {
   });
 }
 
-// Safety button: show current level and rotate through values (then reload)
-if (btnSafety) {
-  function updateSafetyButton() {
-    btnSafety.textContent = 'Safety: ' + safetyLabelFor(currentSafety);
+// Safety UI: button shows static label; status text is printed next to it
+function updateSafetyUI() {
+  if (btnSafety) {
+    btnSafety.textContent = 'Safety';
+    btnSafety.title = 'Click to cycle safety level';
   }
-  updateSafetyButton();
+  const statusEl = document.getElementById('safetyStatus');
+  if (statusEl) statusEl.textContent = safetyLabelFor(currentSafety);
+}
+updateSafetyUI();
+
+if (btnSafety) {
   btnSafety.addEventListener('click', () => {
     const idx = SAFETY_LEVELS.findIndex(s => s.v === String(currentSafety));
     const next = SAFETY_LEVELS[(idx + 1) % SAFETY_LEVELS.length].v;
     setCurrentSafety(next);
-    // Reload page so the change takes effect for current view
+    // reload so the new safety setting is applied to displayed content
     try { location.reload(); } catch (e) { window.location = window.location; }
   });
 }
