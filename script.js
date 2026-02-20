@@ -20,6 +20,27 @@ function placeholderGridHTML(slots = 32) {
 }
 
 // State
+const SAFETY_LEVELS = [
+  { v: '1', label: 'Safe' },
+  { v: '2', label: 'Moderate' },
+  { v: '3', label: 'Restricted' }
+];
+
+function getCurrentSafety() {
+  return localStorage.getItem('safety_level') || '1';
+}
+
+function setCurrentSafety(v) {
+  localStorage.setItem('safety_level', String(v));
+}
+
+function safetyLabelFor(v) {
+  const found = SAFETY_LEVELS.find(s => s.v === String(v));
+  return found ? found.label : String(v);
+}
+
+let currentSafety = getCurrentSafety();
+
 let currentUser = null;
 let perPage = 30;
 let currentPage = 0;
@@ -31,6 +52,7 @@ let globalRowIndex = 0;
 const output = document.getElementById('output');
 const btn = document.getElementById('btnFav');
 const btnClear = document.getElementById('btnClear');
+const btnSafety = document.getElementById('btnSafety');
 
 async function fetchJson(url) {
   const r = await fetch(url);
@@ -39,7 +61,7 @@ async function fetchJson(url) {
 }
 
 async function loadFavoritesPage(page, append = true) {
-  const qs = new URLSearchParams({ method: 'flickr.favorites.getPublicList', api_key: API_KEY, user_id: currentUser, per_page: String(perPage), page: String(page), format: 'json', nojsoncallback: '1' });
+  const qs = new URLSearchParams({ method: 'flickr.favorites.getPublicList', api_key: API_KEY, user_id: currentUser, per_page: String(perPage), page: String(page), safe_search: String(currentSafety), format: 'json', nojsoncallback: '1' });
   const url = `https://api.flickr.com/services/rest/?${qs.toString()}`;
   const data = await fetchJson(url);
   if (data.stat !== 'ok') throw new Error(JSON.stringify(data));
@@ -95,7 +117,7 @@ async function fetchOwners(owners) {
       const ownerEnc = encodeURIComponent(owner);
       try {
         // recent photos
-        const p = new URLSearchParams({ method: 'flickr.people.getPublicPhotos', api_key: API_KEY, user_id: owner, per_page: '32', page: '1', format: 'json', nojsoncallback: '1' });
+        const p = new URLSearchParams({ method: 'flickr.people.getPublicPhotos', api_key: API_KEY, user_id: owner, per_page: '32', page: '1', safe_search: String(currentSafety), format: 'json', nojsoncallback: '1' });
         const url = `https://api.flickr.com/services/rest/?${p.toString()}`;
         const d = await fetchJson(url);
         if (d.stat !== 'ok') throw new Error(JSON.stringify(d));
@@ -110,7 +132,7 @@ async function fetchOwners(owners) {
 
         // favorites for that owner
         try {
-          const pf = new URLSearchParams({ method: 'flickr.favorites.getPublicList', api_key: API_KEY, user_id: owner, per_page: '32', page: '1', format: 'json', nojsoncallback: '1' });
+          const pf = new URLSearchParams({ method: 'flickr.favorites.getPublicList', api_key: API_KEY, user_id: owner, per_page: '32', page: '1', safe_search: String(currentSafety), format: 'json', nojsoncallback: '1' });
           const urlf = `https://api.flickr.com/services/rest/?${pf.toString()}`;
           const df = await fetchJson(urlf);
           if (df.stat !== 'ok') throw new Error(JSON.stringify(df));
@@ -196,6 +218,21 @@ if (btnClear) {
     globalRowIndex = 0;
     output.innerHTML = '';
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {}
+  });
+}
+
+// Safety button: show current level and rotate through values (then reload)
+if (btnSafety) {
+  function updateSafetyButton() {
+    btnSafety.textContent = 'Safety: ' + safetyLabelFor(currentSafety);
+  }
+  updateSafetyButton();
+  btnSafety.addEventListener('click', () => {
+    const idx = SAFETY_LEVELS.findIndex(s => s.v === String(currentSafety));
+    const next = SAFETY_LEVELS[(idx + 1) % SAFETY_LEVELS.length].v;
+    setCurrentSafety(next);
+    // Reload page so the change takes effect for current view
+    try { location.reload(); } catch (e) { window.location = window.location; }
   });
 }
 
