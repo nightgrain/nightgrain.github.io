@@ -27,11 +27,19 @@ const SAFETY_LEVELS = [
 ];
 
 function getCurrentSafety() {
-  return localStorage.getItem('safety_level') || '1';
+  try {
+    return localStorage.getItem('safety_level') || '1';
+  } catch (e) {
+    return '1';
+  }
 }
 
 function setCurrentSafety(v) {
-  localStorage.setItem('safety_level', String(v));
+  try {
+    localStorage.setItem('safety_level', String(v));
+  } catch (e) {
+    // ignore (e.g., private mode where storage is unavailable)
+  }
 }
 
 function safetyLabelFor(v) {
@@ -170,8 +178,9 @@ function onScrollNearBottom(cb) {
   }, 150);
 }
 
-// attach handler
-btn.addEventListener('click', async () => {
+// attach handler (guard in case element isn't present)
+if (btn) {
+  btn.addEventListener('click', async () => {
   currentUser = document.getElementById('userId').value.trim() || '7357400@N08';
   perPage = 30;
   currentPage = 0;
@@ -202,7 +211,10 @@ btn.addEventListener('click', async () => {
       loadingMore = false;
     });
   });
-});
+  });
+} else {
+  console.warn('Get Favorites button not found; click handler not attached');
+}
 
 // Clear / reset to defaults
 if (btnClear) {
